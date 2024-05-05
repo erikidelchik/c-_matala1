@@ -284,6 +284,18 @@ namespace ariel {
             if(contains(i,b)) return "0";
         }
 
+        //check if there are edges between vertices of the same group 
+        for(int i:a){
+            for(int j:a){
+                if(graph.getGraph()[i][j]!=0) return "0";
+            }
+        }
+        for(int i:b){
+            for(int j:b){
+                if(graph.getGraph()[i][j]!=0) return "0";
+            }
+        }
+
 
 
         string str = "A={";

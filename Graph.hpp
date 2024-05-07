@@ -1,3 +1,6 @@
+//id: 318876406
+//email: erikidelchik@gmail.com
+
 #include <iostream>
 #include <vector>
 

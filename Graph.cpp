@@ -63,22 +63,3 @@ namespace ariel {
 
 
 
-//int main() {
-//    Graph g;
-//    vector<vector<int>> mat = {{1,2,3},{4,5,6}};
-//    try {
-//        g.loadGraph(mat);
-//    }
-//    catch (const std::invalid_argument &e){
-//        cout << e.what() << endl;
-//    }
-//    g.loadGraph(mat);
-//    for(int i=0;i<g.getGraph().size();i++){
-//        for(int j=0;j<g.getGraph()[0].size();j++){
-//            cout<<g.getGraph()[i][j]<<' ';
-//        }
-//        cout<<endl;
-//    }
-//    return 0;
-//}
-

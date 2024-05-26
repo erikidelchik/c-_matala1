@@ -21,6 +21,14 @@ namespace ariel {
         return false;
     }
 
+    bool containsEdge(int u,int v,vector<int> list){
+        for(int i=0;i<list.size();i+=2){
+            if(list[i]==u && list[i+1]==v)
+                return true;
+        }
+        return false;
+    }
+
     int Algorithms::isConnected(ariel::Graph graph) {
         for (int i = 0; i < graph.getGraph().size(); i++) {
             if (rowIsZero(graph.getGraph(), i) || colIsZero(graph.getGraph(), i)) return 0;
@@ -61,39 +69,68 @@ namespace ariel {
         }
         vertexes[verAfterSort[0]].key = 0;
 
-
+        vector<int> checked;
 
         //bellman ford
-        for (int i: verAfterSort) {
-            for (int j: vertexes[i].neighbors) {
-                if (vertexes[i].key != INT_MAX && graph.getGraph()[i][j]!=INT_MAX) {
-                    //relax()
-                    if (vertexes[j].key > vertexes[i].key + graph.getGraph()[i][j]) {
-                        vertexes[j].key = vertexes[i].key + graph.getGraph()[i][j];
-                        vertexes[j].pi = i;
+        for(int n=0;n<verAfterSort.size();n++) {
+            for (int i: verAfterSort) {
+                for (int j: vertexes[i].neighbors) {
+                    //check if the edge already been checked this iteration
+                    if (!containsEdge(i, j, checked) && !containsEdge(j,i,checked)) {
+                        //if not, add her
+                        if (graph.getGraph()[i][j] == graph.getGraph()[j][i]) {
+                            checked.push_back(i);
+                            checked.push_back(j);
+                            checked.push_back(j);
+                            checked.push_back(i);
+                        }
+
+                        if (vertexes[i].key != INT_MAX && graph.getGraph()[i][j] != INT_MAX) {
+
+                            //relax()
+                            if (vertexes[j].key > vertexes[i].key + graph.getGraph()[i][j]) {
+                                vertexes[j].key = vertexes[i].key + graph.getGraph()[i][j];
+                                vertexes[j].pi = i;
+
+                            }
+
+
+                        }
                     }
                 }
+
             }
-
-
+            checked.clear();
         }
 
-
+        checked.clear();
 
         //check for negative cycle
-        for (int i: verAfterSort) {
-            for (int j: vertexes[i].neighbors) {
 
-                if (vertexes[i].key!=INT_MAX) {
-                    //relax()
-                    if (vertexes[j].key > vertexes[i].key + graph.getGraph()[i][j]) {
-                        cout<<i<<","<<j<<endl;
-                        return j;
+            for (int i: verAfterSort) {
+                for (int j: vertexes[i].neighbors) {
+                    //check if the edge already been checked this iteration
+                    if (!containsEdge(i, j, checked) && !containsEdge(j,i,checked)) {
+                        //if not, add her
+                        if (graph.getGraph()[i][j] == graph.getGraph()[j][i]) {
+                            checked.push_back(i);
+                            checked.push_back(j);
+                            checked.push_back(j);
+                            checked.push_back(i);
+                        }
+
+                        if (vertexes[i].key != INT_MAX && graph.getGraph()[i][j] != INT_MAX) {
+                            //relax()
+                            if (vertexes[j].key > vertexes[i].key + graph.getGraph()[i][j]) {
+                                cout << i << "," << vertexes[i].key << endl;
+                                return j;
+                            }
+                        }
                     }
                 }
 
             }
-        }
+
 
         return -1;
     }
@@ -387,5 +424,4 @@ namespace ariel {
     }
 
 }
-
 

@@ -54,49 +54,47 @@ namespace ariel {
             }
         }
 
+
         for (int i = 0; i < verAfterSort.size(); i++) {
             vertexes[i].key = INT_MAX;
             vertexes[i].pi = -1;
         }
         vertexes[verAfterSort[0]].key = 0;
 
-        //bellman ford
-        for (int n = 0; n < verAfterSort.size()-1; n++) {
-            for (int i=0; i < verAfterSort.size();i++) {
-                for (int j=i+1; j < verAfterSort.size();j++) {
 
-                    if (graph.getGraph()[verAfterSort[i]][verAfterSort[j]]!=INT_MAX && vertexes[verAfterSort[i]].key!=INT_MAX) {
-                        //relax()
-                        if (vertexes[verAfterSort[j]].key > vertexes[verAfterSort[i]].key + graph.getGraph()[verAfterSort[i]][verAfterSort[j]]) {
-                            vertexes[verAfterSort[j]].key = vertexes[verAfterSort[i]].key + graph.getGraph()[verAfterSort[i]][verAfterSort[j]];
-                            vertexes[verAfterSort[j]].pi = verAfterSort[i];
-                        }
+
+        //bellman ford
+        for (int i: verAfterSort) {
+            for (int j: vertexes[i].neighbors) {
+                if (vertexes[i].key != INT_MAX && graph.getGraph()[i][j]!=INT_MAX) {
+                    //relax()
+                    if (vertexes[j].key > vertexes[i].key + graph.getGraph()[i][j]) {
+                        vertexes[j].key = vertexes[i].key + graph.getGraph()[i][j];
+                        vertexes[j].pi = i;
                     }
                 }
             }
+
+
         }
-        //vertexes[i] = vertex number i
+
 
 
         //check for negative cycle
-        for (int i=0; i < verAfterSort.size();i++) {
-            for (int j=i+1; j < verAfterSort.size();j++) {
+        for (int i: verAfterSort) {
+            for (int j: vertexes[i].neighbors) {
 
-                if (graph.getGraph()[verAfterSort[i]][verAfterSort[j]]!=INT_MAX && vertexes[verAfterSort[i]].key!=INT_MAX) {
-
-                    if (vertexes[verAfterSort[j]].key > vertexes[verAfterSort[i]].key + graph.getGraph()[verAfterSort[i]][verAfterSort[j]]) {
-                        return verAfterSort[j];
+                if (vertexes[i].key!=INT_MAX) {
+                    //relax()
+                    if (vertexes[j].key > vertexes[i].key + graph.getGraph()[i][j]) {
+                        cout<<i<<","<<j<<endl;
+                        return j;
                     }
                 }
+
             }
         }
 
-        for (int i = 0; i < graph.getGraph().size(); i++) {
-            for (int j = 0; j < graph.getGraph().size(); j++) {
-                if (graph.getGraph()[i][j] == INT_MAX)
-                    graph.setGraph(i,j,0);
-            }
-        }
         return -1;
     }
 
@@ -287,7 +285,6 @@ namespace ariel {
             if(contains(i,b)) return "0";
         }
 
-        //check if there are edges between vertices of the same group 
         for(int i:a){
             for(int j:a){
                 if(graph.getGraph()[i][j]!=0) return "0";
@@ -390,4 +387,5 @@ namespace ariel {
     }
 
 }
+
 

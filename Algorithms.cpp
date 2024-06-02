@@ -21,40 +21,30 @@ namespace ariel {
         return false;
     }
 
-    bool containsEdge(int u,int v,vector<int> list){
-        for(int i=0;i<list.size();i+=2){
-            if(list[i]==u && list[i+1]==v)
-                return true;
-        }
-        return false;
-    }
 
     int Algorithms::isConnected(ariel::Graph graph) {
         for (int i = 0; i < graph.getGraph().size(); i++) {
-            if (rowIsZero(graph.getGraph(), i) || colIsZero(graph.getGraph(), i)) return 0;
+            if (rowIsZero(graph.getGraph(), i) && colIsZero(graph.getGraph(), i)) return 0;
         }
         return 1;
     }
 
-    void topologicalSortHelper(int v,vector<Vertex> &vertexes,stack<int> &st,vector<bool> &visited){
-        visited[v] = true;
-        for(int i:vertexes[v].neighbors){
-            if(!visited[i]){
-                topologicalSortHelper(i,vertexes,st,visited);
-            }
-        }
-        st.push(v);
+    int minDistance(const vector<Vertex> &vertexes, bool checked[])
+    {
 
-    }
+        // Initialize min value
+        int min = INT_MAX;
+        int min_index;
 
-    void topologicalSort(int src,vector<Vertex> &vertexes,stack<int> &st){
-        vector<bool> visited(vertexes.size(), false);
-        topologicalSortHelper(src,vertexes,st,visited);
+        for (int v = 0; v < vertexes.size(); v++)
+            if (!checked[v] && vertexes[v].key <= min)
+                min = vertexes[v].key, min_index = v;
 
+        return min_index;
     }
 
     //return -1 if no negative cycle, otherwise return the number of the vertex from which the negative cycle starts
-    int bellmanFord(vector<int> &verAfterSort,vector<Vertex> &vertexes,Graph graph){
+    int bellmanFord(vector<Vertex> &vertexes,Graph graph,int src) {
         for(int i=0;i<vertexes.size();i++){
             for(int j=0;j<vertexes.size();j++){
                 if(graph.getGraph()[i][j] == 0)
@@ -62,75 +52,66 @@ namespace ariel {
             }
         }
 
-
-        for (int i = 0; i < verAfterSort.size(); i++) {
+        bool* checked = new bool[vertexes.size()];
+        for(int i=0;i<vertexes.size();i++){
             vertexes[i].key = INT_MAX;
             vertexes[i].pi = -1;
+            checked[i]= false;
         }
-        vertexes[verAfterSort[0]].key = 0;
 
-        vector<int> checked;
+        vertexes[src].key = 0;
+
 
         //bellman ford
-        for(int n=0;n<verAfterSort.size();n++) {
-            for (int i: verAfterSort) {
-                for (int j: vertexes[i].neighbors) {
-                    //check if the edge already been checked this iteration
-                    if (!containsEdge(i, j, checked) && !containsEdge(j,i,checked)) {
-                        //if not, add her
-                        if (graph.getGraph()[i][j] == graph.getGraph()[j][i]) {
-                            checked.push_back(i);
-                            checked.push_back(j);
-                            checked.push_back(j);
-                            checked.push_back(i);
-                        }
+        for(int n=0;n<vertexes.size()-1;n++) {
 
-                        if (vertexes[i].key != INT_MAX && graph.getGraph()[i][j] != INT_MAX) {
+            for (int i=0;i<vertexes.size()-1;i++) {
+                int u = minDistance(vertexes,checked);
 
-                            //relax()
-                            if (vertexes[j].key > vertexes[i].key + graph.getGraph()[i][j]) {
-                                vertexes[j].key = vertexes[i].key + graph.getGraph()[i][j];
-                                vertexes[j].pi = i;
+                checked[u] = true;
 
-                            }
+                for (int v: vertexes[u].neighbors) {
+                    if (vertexes[u].key != INT_MAX && !checked[v] && vertexes[u].pi!=v) {
 
+                        //relax()
+                        if (vertexes[v].key > vertexes[u].key + graph.getGraph()[u][v]) {
+                            vertexes[v].key = vertexes[u].key + graph.getGraph()[u][v];
+                            vertexes[v].pi = u;
 
                         }
                     }
                 }
 
             }
-            checked.clear();
+            for(int i=0;i<vertexes.size();i++){
+                checked[i] = false;
+            }
         }
 
-        checked.clear();
+
 
         //check for negative cycle
 
-            for (int i: verAfterSort) {
-                for (int j: vertexes[i].neighbors) {
-                    //check if the edge already been checked this iteration
-                    if (!containsEdge(i, j, checked) && !containsEdge(j,i,checked)) {
-                        //if not, add her
-                        if (graph.getGraph()[i][j] == graph.getGraph()[j][i]) {
-                            checked.push_back(i);
-                            checked.push_back(j);
-                            checked.push_back(j);
-                            checked.push_back(i);
-                        }
+        for (int i=0;i<vertexes.size()-1;i++) {
 
-                        if (vertexes[i].key != INT_MAX && graph.getGraph()[i][j] != INT_MAX) {
-                            //relax()
-                            if (vertexes[j].key > vertexes[i].key + graph.getGraph()[i][j]) {
-                                cout << i << "," << vertexes[i].key << endl;
-                                return j;
-                            }
-                        }
+            int u = minDistance(vertexes,checked);
+            checked[u] = true;
+
+            for (int v: vertexes[u].neighbors) {
+                if (vertexes[u].key != INT_MAX && !checked[v] && vertexes[u].pi!=v) {
+
+                    //relax()
+                    if (vertexes[v].key > vertexes[u].key + graph.getGraph()[u][v]) {
+                        delete []checked;
+                        return u;
+
+
                     }
                 }
-
             }
+        }
 
+        delete []checked;
 
         return -1;
     }
@@ -151,17 +132,7 @@ namespace ariel {
         }
 
 
-        //topological sort
-        stack<int> st;
-        topologicalSort(src,vertexes,st);
-
-        vector<int> verAfterSort;
-        while (!st.empty()){
-            verAfterSort.push_back(st.top());
-            st.pop();
-        }
-        if(!contains(dest,verAfterSort)) return "-1";
-        if(bellmanFord(verAfterSort,vertexes,graph)!=-1) return "-1";
+        if(bellmanFord(vertexes,graph,src)!=-1) return "-1";
 
 
         vector<int> path;
@@ -284,8 +255,6 @@ namespace ariel {
         a.push_back(0);
         vector<bool> visited(size,false);
 
-        stack<int> st;
-        topologicalSort(0,vertexes,st);
 
         for(int i=0;i<size;i++){
             if(i%2==0){
@@ -352,8 +321,8 @@ namespace ariel {
     }
 
 
+    void findNegativeCycle(int vi,vector<Vertex>& vertexes,stack<int> &st){
 
-    void findNegativeCycle(int vi,vector<Vertex> &vertexes,stack<int> &st){
         st.push(vi);
         int curr = vertexes[vi].pi;
 
@@ -361,7 +330,10 @@ namespace ariel {
             st.push(curr);
             curr = vertexes[curr].pi;
         }
+
     }
+
+
 
     string Algorithms::negativeCycle(ariel::Graph graph){
         int size = graph.getGraph().size();
@@ -375,19 +347,13 @@ namespace ariel {
         }
 
         stack<int> st;
-        vector<int> verAfterSort;
-
 
         int src;
         for(int i=0;i<size;i++){
-            verAfterSort.clear();
-            topologicalSort(i,vertexes,st);
-            while (!st.empty()){
-                verAfterSort.push_back(st.top());
-                st.pop();
-            }
 
-            src = bellmanFord(verAfterSort,vertexes,graph);
+
+
+            src = bellmanFord(vertexes,graph,i);
             if(src!=-1){
                 findNegativeCycle(src,vertexes,st);
                 string str = "";
@@ -422,6 +388,8 @@ namespace ariel {
         }
         return 1;
     }
+
+}
 
 }
 
